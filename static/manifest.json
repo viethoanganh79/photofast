@@ -1,0 +1,52 @@
+{
+  "name": "PhotoFast - Chỉnh màu ảnh online",
+  "short_name": "PhotoFast",
+  "description": "Công cụ chỉnh sửa ảnh online miễn phí, nhanh chóng. Điều chỉnh độ sáng, tương phản, màu sắc, crop ảnh và nhiều hơn nữa.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f0fdf4",
+  "theme_color": "#22c55e",
+  "orientation": "any",
+  "scope": "/",
+  "lang": "vi",
+  "categories": ["photo", "graphics", "utilities"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.svg",
+      "sizes": "180x180",
+      "type": "image/svg+xml",
+      "purpose": "apple touch icon"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Chỉnh sửa ảnh",
+      "short_name": "Edit",
+      "description": "Bắt đầu chỉnh sửa ảnh mới",
+      "url": "/",
+      "icons": [{ "src": "/favicon.svg", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
+

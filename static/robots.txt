@@ -1,0 +1,11 @@
+# PhotoFast - Image Editor
+# https://photofast.app
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://photofast.app/sitemap.xml
+
+# Disallow admin or private areas (if any)
+# Disallow: /admin/
