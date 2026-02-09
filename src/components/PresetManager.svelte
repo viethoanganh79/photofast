@@ -1,19 +1,22 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type { CustomPreset } from '$lib/presets/customPresets';
 
 	// Props
 	export let customPresets: CustomPreset[] = [];
+	export let importStatus: { type: 'success' | 'error' | 'info'; message: string } | null = null;
 
 	// Event dispatcher
 	const dispatch = createEventDispatcher<{
 		edit: { presetId: string };
 		delete: { presetId: string };
 		export: { presetId: string };
+		import: { files: FileList };
 	}>();
 
 	let hoveredPresetId: string | null = null;
 	let showDeleteConfirm: string | null = null;
+	let importInput: HTMLInputElement | null = null;
 
 	function handleEdit(presetId: string) {
 		dispatch('edit', { presetId });
@@ -35,16 +38,47 @@
 	function handleExport(presetId: string) {
 		dispatch('export', { presetId });
 	}
+
+	function triggerImport() {
+		importInput?.click();
+	}
+
+	function handleImportChange(event: Event) {
+		const input = event.target as HTMLInputElement;
+		if (!input.files || input.files.length === 0) return;
+		dispatch('import', { files: input.files });
+		input.value = '';
+	}
 </script>
 
-{#if customPresets.length > 0}
 	<div class="preset-manager">
 		<div class="manager-header">
-			<h4 class="manager-title">⭐ Preset của tôi</h4>
+			<h4 class="manager-title">
+				<span>😎</span>
+				<span>Preset của tôi</span>
+			</h4>
+			<div class="manager-actions">
+				<button class="import-btn" on:click={triggerImport} title="Import preset Lightroom">Import</button>
+				<input
+					class="import-input"
+					type="file"
+					accept=".xmp,.lrtemplate"
+					multiple
+					bind:this={importInput}
+					on:change={handleImportChange}
+				/>
+			</div>
 		</div>
+
+		{#if importStatus}
+			<div class="import-status {importStatus.type}">
+				{importStatus.message}
+			</div>
+		{/if}
 
 		<div class="preset-list">
 			{#each customPresets as preset (preset.id)}
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div
 					class="preset-item"
 					on:mouseenter={() => hoveredPresetId = preset.id}
@@ -103,7 +137,6 @@
 			{/each}
 		</div>
 	</div>
-{/if}
 
 <style>
 	.preset-manager {
@@ -121,17 +154,92 @@
 
 	.manager-header {
 		margin-bottom: 12px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
 	}
 
 	.manager-title {
-		font-size: 14px;
-		font-weight: 600;
-		color: var(--color-surface-700);
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 1rem;
+		font-weight: 700;
+		color: var(--color-surface-800);
 		margin: 0;
 	}
 
 	:global(.dark) .manager-title {
 		color: var(--color-surface-300);
+	}
+
+	.manager-actions {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.import-btn {
+		background: var(--color-accent-500);
+		color: white;
+		border: none;
+		padding: 6px 10px;
+		border-radius: var(--radius-cartoon);
+		font-size: 12px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 150ms ease;
+	}
+
+	.import-btn:hover {
+		background: var(--color-accent-600);
+		transform: scale(1.03);
+	}
+
+	.import-input {
+		display: none;
+	}
+
+	.import-status {
+		padding: 8px 10px;
+		border-radius: var(--radius-cartoon);
+		font-size: 12px;
+		font-weight: 600;
+		margin-bottom: 8px;
+	}
+
+	.import-status.success {
+		background: rgba(16, 185, 129, 0.15);
+		color: #065f46;
+		border: 1px solid rgba(16, 185, 129, 0.4);
+	}
+
+	.import-status.info {
+		background: rgba(59, 130, 246, 0.15);
+		color: #1e3a8a;
+		border: 1px solid rgba(59, 130, 246, 0.35);
+	}
+
+	.import-status.error {
+		background: rgba(239, 68, 68, 0.15);
+		color: #7f1d1d;
+		border: 1px solid rgba(239, 68, 68, 0.35);
+	}
+
+	:global(.dark) .import-status.success {
+		color: #a7f3d0;
+		border-color: rgba(16, 185, 129, 0.5);
+	}
+
+	:global(.dark) .import-status.info {
+		color: #bfdbfe;
+		border-color: rgba(59, 130, 246, 0.5);
+	}
+
+	:global(.dark) .import-status.error {
+		color: #fecaca;
+		border-color: rgba(239, 68, 68, 0.5);
 	}
 
 	.preset-list {

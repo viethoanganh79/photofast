@@ -11,8 +11,9 @@
 	import ExportProgress from '$lib/../components/ExportProgress.svelte';
 	import CropModal from '$lib/../components/CropModal.svelte';
 	import { defaultFilterState, applyFilters, applyFiltersToBoth, type FilterState } from '$lib/canvas/filters';
-	import type { Preset } from '$lib/presets/presets';
+	import { presets as defaultPresets, type Preset } from '$lib/presets/presets';
 	import { loadCustomPresets, saveCustomPreset, deleteCustomPreset, updateCustomPreset, createPresetFromState, type CustomPreset } from '$lib/presets/customPresets';
+	import { importLightroomPresetFile } from '$lib/presets/lightroomImport';
 	import { debounce } from '$lib/utils/debounce';
 	import { renderFrame, removeAllFrameObjects, type FrameId, type FrameOptions } from '$lib/frames';
 	import type { ImageLimitsCheck } from '$lib/utils/fabricLimits';
@@ -45,6 +46,7 @@
 	let showSavePresetModal = false;
 	let editingPresetId: string | null = null;
 	let editingPresetData: { name: string; emoji: string; description: string } | null = null;
+	let importStatus: { type: 'success' | 'error' | 'info'; message: string } | null = null;
 	
 	// Export progress state
 	let exportSteps: Array<{
@@ -385,6 +387,44 @@
 			console.error('Failed to export preset:', error);
 		}
 	}
+
+	async function handlePresetImport(e: CustomEvent<{ files: FileList }>) {
+		const files = Array.from(e.detail.files || []);
+		if (files.length === 0) return;
+
+		importStatus = { type: 'info', message: `Äang import ${files.length} file...` };
+
+		let success = 0;
+		let failed = 0;
+		const existingNames = new Set<string>([
+			...defaultPresets.map(p => p.name),
+			...customPresets.map(p => p.name),
+		]);
+
+		for (const file of files) {
+			try {
+				const preset = await importLightroomPresetFile(file, {
+					defaultEmoji: '📥',
+					existingNames,
+				});
+				saveCustomPreset(preset);
+				success += 1;
+			} catch (error) {
+				failed += 1;
+				console.warn('Import failed:', file.name, error);
+			}
+		}
+
+		customPresets = loadCustomPresets();
+
+		if (success > 0 && failed === 0) {
+			importStatus = { type: 'success', message: `ÄÃ£ import ${success} preset.` };
+		} else if (success > 0) {
+			importStatus = { type: 'info', message: `Import ${success} preset, ${failed} lá»—i.` };
+		} else {
+			importStatus = { type: 'error', message: `Import tháº¥t báº¡i (${failed} file).` };
+		}
+	}
 	
 	// ========================================
 	// CROP HANDLERS
@@ -584,11 +624,13 @@
 			<PresetPanel 
 				{activePresetId}
 				{customPresets}
+				{importStatus}
 				on:select={handlePresetSelect}
 				on:savePreset={handleSavePreset}
 				on:editPreset={handlePresetEdit}
 				on:deletePreset={handlePresetDelete}
 				on:exportPreset={handlePresetExport}
+				on:importPreset={handlePresetImport}
 			/>
 		</div>
 
@@ -1390,4 +1432,3 @@
 	}
 	
 </style>
-

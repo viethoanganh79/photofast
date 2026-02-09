@@ -7,6 +7,7 @@
 	// Props
 	export let activePresetId: string = 'original';
 	export let customPresets: CustomPreset[] = [];
+	export let importStatus: { type: 'success' | 'error' | 'info'; message: string } | null = null;
 	
 	// Event dispatcher
 	const dispatch = createEventDispatcher<{
@@ -15,6 +16,7 @@
 		editPreset: { presetId: string };
 		deletePreset: { presetId: string };
 		exportPreset: { presetId: string };
+		importPreset: { files: FileList };
 	}>();
 	
 	// Get all presets (default + custom)
@@ -39,6 +41,10 @@
 	
 	function handleExportPreset(e: CustomEvent<{ presetId: string }>) {
 		dispatch('exportPreset', e.detail);
+	}
+
+	function handleImportPreset(e: CustomEvent<{ files: FileList }>) {
+		dispatch('importPreset', e.detail);
 	}
 </script>
 
@@ -72,14 +78,14 @@
 	</div>
 	
 	<!-- Custom Presets Manager -->
-	{#if customPresets.length > 0}
-		<PresetManager
-			{customPresets}
-			on:edit={handleEditPreset}
-			on:delete={handleDeletePreset}
-			on:export={handleExportPreset}
-		/>
-	{/if}
+	<PresetManager
+		{customPresets}
+		{importStatus}
+		on:edit={handleEditPreset}
+		on:delete={handleDeletePreset}
+		on:export={handleExportPreset}
+		on:import={handleImportPreset}
+	/>
 </div>
 
 <style>
@@ -108,7 +114,7 @@
 	}
 	
 	:global(.dark) .panel-title {
-		color: var(--color-surface-100);
+		color: var(--color-surface-300);
 	}
 	
 	.save-preset-btn {
